@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Market</h1>
+<table>
+  <tr><th>Symbol</th><th>Company</th><th>Exchange</th><th class="n">Price</th><th></th></tr>
+  {% for s in stocks %}
+  <tr><td><b>{{ s.ticker_symbol }}</b></td><td>{{ s.company_name }}</td><td>{{ s.exchange }}</td>
+    <td class="n">{{ s.current_price|money }}</td><td><a href="{{ url_for('stock', stock_id=s.stock_id) }}">Trade</a></td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

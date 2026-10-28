@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Exchange desk</h1>
+<p class="muted">Move a price to simulate the market. Waiting limit orders that now qualify are filled in the same database transaction.</p>
+<form method="post" class="inline panel">
+  <select name="stock_id">{% for s in stocks %}<option value="{{ s.stock_id }}">{{ s.ticker_symbol }} (₹{{ s.current_price|money }})</option>{% endfor %}</select>
+  <input type="number" name="price" step="0.05" min="0.05" placeholder="New price" required>
+  <button class="primary">Update price</button>
+</form>
+<div class="two">
+  <div><h2>Waiting orders</h2>
+    {% if book %}<table><tr><th>#</th><th>Stock</th><th>Side</th><th class="n">Limit</th><th class="n">Qty</th><th>Trader</th></tr>
+    {% for b in book %}<tr><td>{{ b.order_id }}</td><td>{{ b.ticker_symbol }}</td><td>{{ b.side }}</td><td class="n">{{ b.limit_price|money }}</td><td class="n">{{ b.quantity }}</td><td>{{ b.full_name }}</td></tr>{% endfor %}</table>
+    {% else %}<p class="muted">No waiting orders.</p>{% endif %}</div>
+  <div><h2>Audit log</h2>
+    <table><tr><th>What</th><th>Change</th><th>When</th></tr>
+    {% for a in audit %}<tr><td>{{ a.entity|capitalize }} {{ a.entity_id }}</td><td>{{ a.old_value }} → {{ a.new_value }}</td><td>{{ a.logged_at.strftime('%H:%M:%S') }}</td></tr>{% endfor %}</table></div>
+</div>
+{% endblock %}

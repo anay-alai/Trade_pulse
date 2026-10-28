@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="login">
+  <h1>Pick a trader to start</h1>
+  <p class="muted">Demo accounts only. Each has a funded wallet and a few holdings.</p>
+  <form method="post" class="stack">
+    {% for u in users %}
+    <button name="user_id" value="{{ u.user_id }}" class="who-btn">{{ u.full_name }}<span>{{ u.email }}</span></button>
+    {% endfor %}
+  </form>
+</section>
+{% endblock %}

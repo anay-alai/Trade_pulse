@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your portfolio</h1>
+<div class="stats">
+  <div><span>Available cash</span><b>₹{{ wallet.available_balance|money }}</b></div>
+  <div><span>Held for open orders</span><b>₹{{ wallet.locked_balance|money }}</b></div>
+  <div><span>Invested</span><b>₹{{ invested|money }}</b></div>
+  <div><span>Current value</span><b>₹{{ value|money }}</b></div>
+  <div><span>Profit / loss</span><b class="{{ 'gain' if pnl >= 0 else 'loss' }}">₹{{ pnl|money }}</b></div>
+</div>
+
+<h2>Holdings</h2>
+{% if holdings %}
+<table>
+  <tr><th>Stock</th><th class="n">Qty</th><th class="n">Avg price</th><th class="n">Price</th><th class="n">Value</th><th class="n">P&amp;L</th></tr>
+  {% for h in holdings %}
+  <tr><td><a href="{{ url_for('stock', stock_id=h.stock_id) }}">{{ h.ticker_symbol }}</a></td>
+    <td class="n">{{ h.total_quantity }}{% if h.locked_quantity %} <small>({{ h.locked_quantity }} on sale)</small>{% endif %}</td>
+    <td class="n">{{ h.avg_buy_price|money }}</td><td class="n">{{ h.current_price|money }}</td>
+    <td class="n">{{ h.current_value|money }}</td>
+    <td class="n {{ 'gain' if h.pnl >= 0 else 'loss' }}">{{ h.pnl|money }} ({{ h.pnl_pct }}%)</td></tr>
+  {% endfor %}
+</table>
+{% else %}<p class="muted">No holdings yet. Open the <a href="{{ url_for('market') }}">market</a> to place your first order.</p>{% endif %}
+
+<h2>Recent orders</h2>
+{% if orders %}
+<table>
+  <tr><th>#</th><th>Stock</th><th>Side</th><th>Type</th><th class="n">Qty</th><th class="n">Limit</th><th>Status</th><th></th></tr>
+  {% for o in orders %}
+  <tr><td>{{ o.order_id }}</td><td>{{ o.ticker_symbol }}</td><td class="{{ 'gain' if o.side == 'BUY' else 'loss' }}">{{ o.side }}</td>
+    <td>{{ o.order_type }}</td><td class="n">{{ o.quantity }}</td><td class="n">{{ o.limit_price|money if o.limit_price else '–' }}</td>
+    <td>{{ o.status|capitalize }}</td>
+    <td>{% if o.status == 'PENDING' %}<form method="post" action="{{ url_for('cancel', order_id=o.order_id) }}"><button class="link">Cancel order</button></form>{% endif %}</td></tr>
+  {% endfor %}
+</table>
+{% else %}<p class="muted">No orders yet.</p>{% endif %}
+{% endblock %}
