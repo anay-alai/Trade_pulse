@@ -1,4 +1,4 @@
-# Paisa Desk – a stock trading platform in MySQL
+# Trade Pulse – a stock trading platform in MySQL
 
 A Zerodha/Groww-style DBMS project. Users hold a wallet, place market or limit orders, and see holdings and P&L.
 The business rules live in the database (procedures, triggers, constraints); Flask + plain HTML/CSS is a thin layer on top.
