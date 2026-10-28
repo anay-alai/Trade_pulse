@@ -2,21 +2,30 @@
 {% block content %}
 <h1>Wallet</h1>
 <div class="stats">
-  <div><span>Available</span><b>₹{{ w.available_balance|money }}</b></div>
-  <div><span>Held for open orders</span><b>₹{{ w.locked_balance|money }}</b></div>
+  <div><span>Available</span><b>₹{{ (w.available_balance if w else 0)|money }}</b></div>
+  <div><span>Held for open orders</span><b>₹{{ (w.locked_balance if w else 0)|money }}</b></div>
 </div>
 <form method="post" class="inline panel">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <input type="number" name="amount" step="0.01" min="0.01" placeholder="Amount in ₹" required>
   <button class="primary" name="action" value="deposit">Add funds</button>
-  <button name="action" value="withdraw">Withdraw</button>
+  <button name="action" value="withdraw" onclick="return confirm('Confirm withdrawal of funds?');">Withdraw</button>
 </form>
 <h2>Ledger</h2>
+{% if ledger %}
 <table>
   <tr><th>#</th><th>Type</th><th class="n">Amount</th><th class="n">Running total</th><th>When</th></tr>
   {% for t in ledger %}
-  <tr><td>{{ t.txn_id }}</td><td>{{ t.txn_type.replace('_', ' ')|capitalize }}</td>
-    <td class="n {{ 'gain' if t.amount >= 0 else 'loss' }}">{{ t.amount|money }}</td><td class="n">{{ t.running|money }}</td>
-    <td>{{ t.created_at.strftime('%d %b %H:%M') }}</td></tr>
+  <tr>
+    <td>{{ t.txn_id }}</td>
+    <td>{{ t.txn_type.replace('_', ' ')|capitalize }}</td>
+    <td class="n {{ 'gain' if t.amount >= 0 else 'loss' }}">{{ t.amount|money }}</td>
+    <td class="n">{{ t.running|money }}</td>
+    <td>{{ t.created_at.strftime('%d %b %H:%M') }}</td>
+  </tr>
   {% endfor %}
 </table>
+{% else %}
+<p class="muted">No transactions recorded yet.</p>
+{% endif %}
 {% endblock %}

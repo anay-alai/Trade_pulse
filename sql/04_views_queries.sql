@@ -6,7 +6,7 @@ SELECT p.user_id, s.stock_id, s.ticker_symbol, s.company_name,
        ROUND(p.total_quantity * p.avg_buy_price, 2)  AS invested,
        ROUND(p.total_quantity * s.current_price, 2)  AS current_value,
        ROUND(p.total_quantity * (s.current_price - p.avg_buy_price), 2) AS pnl,
-       ROUND((s.current_price - p.avg_buy_price) / p.avg_buy_price * 100, 2) AS pnl_pct
+       ROUND((s.current_price - p.avg_buy_price) / NULLIF(p.avg_buy_price, 0) * 100, 2) AS pnl_pct
 FROM portfolio p JOIN stocks s USING (stock_id);
 
 CREATE OR REPLACE VIEW v_order_book AS
@@ -16,13 +16,13 @@ WHERE o.status = 'PENDING';
 
 CREATE OR REPLACE VIEW v_net_worth AS
 SELECT u.user_id, u.full_name,
-       w.available_balance + w.locked_balance AS cash,
+       COALESCE(w.available_balance + w.locked_balance, 0) AS cash,
        COALESCE((SELECT SUM(h.current_value) FROM v_holdings h WHERE h.user_id = u.user_id), 0) AS holdings
-FROM users u JOIN wallets w USING (user_id);
+FROM users u LEFT JOIN wallets w USING (user_id);
 
 -- ---- Example analytical queries (also used by the web app) ----
 -- Net worth leaderboard (window RANK):
---   SELECT full_name, cash + holdings AS net_worth, RANK() OVER (ORDER BY cash + holdings DESC) AS position FROM v_net_worth;
+--   SELECT full_name, cash, holdings, cash + holdings AS net_worth, RANK() OVER (ORDER BY cash + holdings DESC) AS position FROM v_net_worth;
 -- 5-day moving average (window AVG):
 --   SELECT recorded_at, price, AVG(price) OVER (ORDER BY recorded_at ROWS BETWEEN 4 PRECEDING AND CURRENT ROW) AS ma5
 --   FROM stock_prices WHERE stock_id = 1;

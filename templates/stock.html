@@ -4,21 +4,57 @@
 <p class="price">₹{{ s.current_price|money }}</p>
 {% if held %}<p class="muted">You hold {{ held.total_quantity }} shares at an average of ₹{{ held.avg_buy_price|money }}.</p>{% endif %}
 <div class="two">
-  <form method="post" action="{{ url_for('order') }}" class="panel stack">
+  <form method="post" action="{{ url_for('order') }}" class="panel stack" id="order-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
     <h2>Place an order</h2>
     <input type="hidden" name="stock_id" value="{{ s.stock_id }}">
-    <label>Action <select name="side"><option>BUY</option><option>SELL</option></select></label>
-    <label>Order type <select name="order_type"><option value="MARKET">Market (fill now)</option><option value="LIMIT">Limit (wait for my price)</option></select></label>
-    <label>Quantity <input type="number" name="quantity" min="1" value="1" required></label>
-    <label>Limit price (limit orders only) <input type="number" name="limit_price" step="0.05" min="0.05"></label>
+    <label>Action
+      <select name="side">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
+    </label>
+    <label>Order type
+      <select name="order_type" id="order-type-select">
+        <option value="MARKET">Market (fill now)</option>
+        <option value="LIMIT">Limit (wait for my price)</option>
+      </select>
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="1" value="1" required>
+    </label>
+    <label id="limit-price-label">Limit price (limit orders only)
+      <input type="number" name="limit_price" id="limit-price-input" step="0.05" min="0.05" placeholder="e.g. {{ s.current_price }}">
+    </label>
     <button class="primary">Place order</button>
   </form>
   <div>
     <h2>Last 12 prices</h2>
     <table>
       <tr><th>Time</th><th class="n">Price</th><th class="n">5-point average</th></tr>
-      {% for p in history %}<tr><td>{{ p.recorded_at.strftime('%d %b %H:%M') }}</td><td class="n">{{ p.price|money }}</td><td class="n">{{ p.ma5|money }}</td></tr>{% endfor %}
+      {% for p in history %}
+      <tr>
+        <td>{{ p.recorded_at.strftime('%d %b %H:%M') }}</td>
+        <td class="n">{{ p.price|money }}</td>
+        <td class="n">{{ p.ma5|money }}</td>
+      </tr>
+      {% endfor %}
     </table>
   </div>
 </div>
+
+<script>
+  const orderTypeSelect = document.getElementById('order-type-select');
+  const limitInput = document.getElementById('limit-price-input');
+  function updateLimitVisibility() {
+    if (orderTypeSelect.value === 'LIMIT') {
+      limitInput.required = true;
+      limitInput.focus();
+    } else {
+      limitInput.required = false;
+      limitInput.value = '';
+    }
+  }
+  orderTypeSelect.addEventListener('change', updateLimitVisibility);
+</script>
 {% endblock %}

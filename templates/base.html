@@ -11,13 +11,18 @@
 <aside>
   <div class="brand">Paisa Desk</div>
   <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('market') }}">Market</a>
-    <a href="{{ url_for('wallet') }}">Wallet</a>
-    <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
-    <a href="{{ url_for('admin') }}">Exchange desk</a>
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
+    <a href="{{ url_for('market') }}" class="{{ 'active' if request.endpoint == 'market' else '' }}">Market</a>
+    <a href="{{ url_for('wallet') }}" class="{{ 'active' if request.endpoint == 'wallet' else '' }}">Wallet</a>
+    <a href="{{ url_for('leaderboard') }}" class="{{ 'active' if request.endpoint == 'leaderboard' else '' }}">Leaderboard</a>
+    {% if session.is_admin %}
+    <a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' else '' }}">Exchange desk</a>
+    {% endif %}
   </nav>
-  <div class="who">{{ session.name }}<br><a href="{{ url_for('logout') }}">Switch user</a></div>
+  <div class="who">
+    <b>{{ session.name }}</b>{% if session.is_admin %} <small>(Admin)</small>{% endif %}<br>
+    <a href="{{ url_for('logout') }}">Switch user</a>
+  </div>
 </aside>
 {% endif %}
 <main>

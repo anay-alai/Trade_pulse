@@ -49,8 +49,8 @@ CREATE TABLE stocks (
 CREATE TABLE stock_prices (
   price_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   stock_id INT NOT NULL,
-  price DECIMAL(12,2) NOT NULL,
-  volume BIGINT NOT NULL DEFAULT 0,
+  price DECIMAL(12,2) NOT NULL CHECK (price > 0),
+  volume BIGINT NOT NULL DEFAULT 0 CHECK (volume >= 0),
   recorded_at DATETIME NOT NULL,
   INDEX idx_price_time (stock_id, recorded_at),
   FOREIGN KEY (stock_id) REFERENCES stocks(stock_id)
@@ -68,9 +68,11 @@ CREATE TABLE orders (
   status ENUM('PENDING','FILLED','CANCELLED') NOT NULL DEFAULT 'PENDING',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHECK (filled_quantity <= quantity),
-  CHECK (order_type = 'MARKET' OR limit_price IS NOT NULL),
+  CHECK (order_type = 'MARKET' OR (limit_price IS NOT NULL AND limit_price > 0)),
+  CHECK (limit_price IS NULL OR limit_price > 0),
   INDEX idx_book (stock_id, status, side, limit_price, created_at),
   INDEX idx_user_orders (user_id, created_at),
+  INDEX idx_user_orders_desc (user_id, order_id DESC),
   FOREIGN KEY (user_id) REFERENCES users(user_id),
   FOREIGN KEY (stock_id) REFERENCES stocks(stock_id)
 ) ENGINE=InnoDB;
@@ -78,8 +80,8 @@ CREATE TABLE orders (
 CREATE TABLE order_executions (
   execution_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   order_id INT NOT NULL,
-  executed_price DECIMAL(12,2) NOT NULL,
-  executed_quantity INT NOT NULL,
+  executed_price DECIMAL(12,2) NOT NULL CHECK (executed_price > 0),
+  executed_quantity INT NOT NULL CHECK (executed_quantity > 0),
   executed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(order_id)
 ) ENGINE=InnoDB;
@@ -115,7 +117,7 @@ CREATE TABLE watchlist_items (
 CREATE TABLE audit_log (
   log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   entity VARCHAR(30) NOT NULL,
-  entity_id INT NOT NULL,
+  entity_id BIGINT NOT NULL,
   action VARCHAR(30) NOT NULL,
   old_value VARCHAR(60),
   new_value VARCHAR(60),

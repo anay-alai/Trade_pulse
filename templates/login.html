@@ -2,10 +2,14 @@
 {% block content %}
 <section class="login">
   <h1>Pick a trader to start</h1>
-  <p class="muted">Demo accounts only. Each has a funded wallet and a few holdings.</p>
+  <p class="muted">Demo accounts only. Each has a funded wallet and sample holdings.</p>
   <form method="post" class="stack">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
     {% for u in users %}
-    <button name="user_id" value="{{ u.user_id }}" class="who-btn">{{ u.full_name }}<span>{{ u.email }}</span></button>
+    <button name="user_id" value="{{ u.user_id }}" class="who-btn" {% if u.status == 'SUSPENDED' %}disabled style="opacity: 0.5;"{% endif %}>
+      {{ u.full_name }} {% if u.user_id == 1 %}<small>(Admin)</small>{% endif %}
+      <span>{{ u.email }} {% if u.status == 'SUSPENDED' %}&bull; Suspended{% endif %}</span>
+    </button>
     {% endfor %}
   </form>
 </section>

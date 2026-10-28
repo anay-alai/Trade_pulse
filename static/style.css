@@ -5,7 +5,7 @@ aside{width:220px;background:var(--ink);color:#e8edf2;padding:24px 18px;display:
 .brand{font-size:22px;font-weight:700;letter-spacing:.2px}
 aside nav{display:flex;flex-direction:column;gap:2px}
 aside nav a{color:#c9d3dd;text-decoration:none;padding:9px 12px;border-radius:8px}
-aside nav a:hover,aside nav a:focus-visible{background:#243242;color:#fff;outline:none}
+aside nav a:hover,aside nav a:focus-visible,aside nav a.active{background:#243242;color:#fff;outline:none}
 .who{margin-top:auto;font-size:13px;color:#9fb0c1}.who a{color:#fff}
 main{flex:1;padding:32px 40px;max-width:1100px}
 h1{font-size:28px;margin:0 0 16px}h1 small{font-size:16px;color:var(--muted);font-weight:400;margin-left:8px}
