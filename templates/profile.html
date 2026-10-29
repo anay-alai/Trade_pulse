@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Profile</h1>
+<div class="stats">
+  <div><span>Name</span><b>{{ user.full_name }}</b></div>
+  <div><span>Email</span><b>{{ user.email }}</b></div>
+  <div><span>Status</span><b>{{ user.status }}</b></div>
+  <div><span>PAN</span><b>{{ user.pan_number or 'Not available' }}</b></div>
+  <div><span>KYC</span><b>{{ user.kyc_status or 'Not started' }}</b></div>
+</div>
+
+<h2>Wallet snapshot</h2>
+<div class="stats">
+  <div><span>Available</span><b>₹{{ (wallet.available_balance if wallet else 0)|money }}</b></div>
+  <div><span>Locked</span><b>₹{{ (wallet.locked_balance if wallet else 0)|money }}</b></div>
+</div>
+{% endblock %}

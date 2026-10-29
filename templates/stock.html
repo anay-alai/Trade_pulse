@@ -29,6 +29,26 @@
     <button class="primary">Place order</button>
   </form>
   <div>
+    <div class="panel">
+      <h2>Watchlists</h2>
+      {% if watchlists %}
+      <form method="post" action="{{ url_for('watchlist') }}" class="stack">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="add_stock">
+        <input type="hidden" name="stock_id" value="{{ s.stock_id }}">
+        <label>Save to watchlist
+          <select name="watchlist_id" required>
+            {% for w in watchlists %}
+            <option value="{{ w.watchlist_id }}">{{ w.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="primary">Add to selected watchlist</button>
+      </form>
+      {% else %}
+      <p class="muted">No watchlists yet. Create one from the <a href="{{ url_for('watchlist') }}">watchlists page</a>.</p>
+      {% endif %}
+    </div>
     <h2>Last 12 prices</h2>
     <table>
       <tr><th>Time</th><th class="n">Price</th><th class="n">5-point average</th></tr>

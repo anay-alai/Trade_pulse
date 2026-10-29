@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Watchlists</h1>
+
+<form method="post" class="panel inline">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="action" value="create">
+  <input type="text" name="name" placeholder="New watchlist name" maxlength="50" required>
+  <button class="primary">Create watchlist</button>
+</form>
+
+{% if watchlists %}
+<div class="watchlist-grid">
+  {% for w in watchlists %}
+  <div class="panel watchlist-item">
+    <div class="watchlist-header">
+      <h2>{{ w.name }}</h2>
+      <form method="post" class="inline-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="watchlist_id" value="{{ w.watchlist_id }}">
+        <button class="link" onclick="return confirm('Delete this watchlist?');">Delete</button>
+      </form>
+    </div>
+    <p class="muted">{{ w.item_count }} stock(s)</p>
+    <form method="post" class="stack small-gap">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="add_stock">
+      <input type="hidden" name="watchlist_id" value="{{ w.watchlist_id }}">
+      <label>
+        Add stock
+        <select name="stock_id" required>
+          <option value="">Select a stock</option>
+          {% for s in all_stocks %}
+          <option value="{{ s.stock_id }}">{{ s.ticker_symbol }} - {{ s.company_name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="primary">Add</button>
+    </form>
+
+    {% set grouped = [] %}
+    {% for it in items %}
+      {% if it.watchlist_id == w.watchlist_id and it.stock_id %}
+        {% set grouped = grouped + [it] %}
+      {% endif %}
+    {% endfor %}
+
+    {% if grouped %}
+    <ul class="watchlist-list">
+      {% for it in grouped %}
+      <li>
+        <a href="{{ url_for('stock', stock_id=it.stock_id) }}">{{ it.ticker_symbol }}</a>
+        <span>{{ it.company_name }}</span>
+        <form method="post" class="inline-form remove-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="remove_stock">
+          <input type="hidden" name="watchlist_id" value="{{ w.watchlist_id }}">
+          <input type="hidden" name="stock_id" value="{{ it.stock_id }}">
+          <button class="link">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">This watchlist is empty.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">You have not created any watchlists yet.</p>
+{% endif %}
+{% endblock %}

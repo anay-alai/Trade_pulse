@@ -150,6 +150,116 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/profile")
+@login_required
+def profile():
+    uid = session["uid"]
+    user = query(
+        """SELECT u.user_id, u.full_name, u.email, u.status,
+                  up.pan_number, up.kyc_status
+           FROM users u LEFT JOIN user_profiles up USING (user_id)
+           WHERE u.user_id=%s""",
+        (uid,),
+        True,
+    )
+    wallet = query("SELECT * FROM wallets WHERE user_id=%s", (uid,), True)
+    return render_template("profile.html", user=user, wallet=wallet)
+
+
+@app.route("/watchlist", methods=["GET", "POST"])
+@login_required
+def watchlist():
+    uid = session["uid"]
+    if request.method == "POST":
+        action = request.form.get("action", "").strip()
+
+        if action == "create":
+            name = request.form.get("name", "").strip()
+            if not name:
+                flash("Please provide a watchlist name.", "error")
+                return redirect(url_for("watchlist"))
+            try:
+                query(
+                    "INSERT INTO watchlists (user_id, name) VALUES (%s, %s)",
+                    (uid, name),
+                )
+                flash(f"Watchlist '{name}' created.", "ok")
+            except mysql.connector.IntegrityError:
+                flash("A watchlist with that name already exists.", "error")
+            return redirect(url_for("watchlist"))
+
+        if action == "add_stock":
+            try:
+                stock_id = int(request.form.get("stock_id", "0"))
+                watchlist_id = int(request.form.get("watchlist_id", "0"))
+            except (TypeError, ValueError):
+                flash("Invalid watchlist selection.", "error")
+                return redirect(url_for("watchlist"))
+
+            if not stock_id or not watchlist_id:
+                flash("Select both a watchlist and a stock.", "error")
+                return redirect(url_for("watchlist"))
+
+            try:
+                query(
+                    "INSERT INTO watchlist_items (watchlist_id, stock_id) VALUES (%s, %s)",
+                    (watchlist_id, stock_id),
+                )
+                flash("Stock added to watchlist.", "ok")
+            except mysql.connector.IntegrityError:
+                flash("This stock is already in the selected watchlist.", "error")
+            return redirect(url_for("watchlist"))
+
+        if action == "remove_stock":
+            try:
+                stock_id = int(request.form.get("stock_id", "0"))
+                watchlist_id = int(request.form.get("watchlist_id", "0"))
+            except (TypeError, ValueError):
+                flash("Invalid selection.", "error")
+                return redirect(url_for("watchlist"))
+            query(
+                "DELETE FROM watchlist_items WHERE watchlist_id=%s AND stock_id=%s",
+                (watchlist_id, stock_id),
+            )
+            flash("Stock removed from watchlist.", "ok")
+            return redirect(url_for("watchlist"))
+
+        if action == "delete":
+            try:
+                watchlist_id = int(request.form.get("watchlist_id", "0"))
+            except (TypeError, ValueError):
+                flash("Invalid watchlist selection.", "error")
+                return redirect(url_for("watchlist"))
+            query("DELETE FROM watchlists WHERE watchlist_id=%s AND user_id=%s", (watchlist_id, uid))
+            flash("Watchlist deleted.", "ok")
+            return redirect(url_for("watchlist"))
+
+        flash("Invalid watchlist action.", "error")
+        return redirect(url_for("watchlist"))
+
+    watchlists = query(
+        """SELECT w.watchlist_id, w.name,
+                  COUNT(wi.stock_id) AS item_count
+           FROM watchlists w
+           LEFT JOIN watchlist_items wi USING (watchlist_id)
+           WHERE w.user_id=%s
+           GROUP BY w.watchlist_id, w.name
+           ORDER BY w.name""",
+        (uid,),
+    )
+    items = query(
+        """SELECT w.watchlist_id, w.name, s.stock_id, s.ticker_symbol, s.company_name
+           FROM watchlists w
+           LEFT JOIN watchlist_items wi ON wi.watchlist_id = w.watchlist_id
+           LEFT JOIN stocks s ON s.stock_id = wi.stock_id
+           WHERE w.user_id=%s
+           ORDER BY w.name, s.ticker_symbol""",
+        (uid,),
+    )
+    all_stocks = query("SELECT stock_id, ticker_symbol, company_name FROM stocks ORDER BY ticker_symbol")
+    return render_template("watchlist.html", watchlists=watchlists, items=items, all_stocks=all_stocks)
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -184,7 +294,14 @@ def stock(stock_id):
                               ROUND(AVG(price) OVER (ORDER BY recorded_at ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
                        FROM stock_prices WHERE stock_id=%s ORDER BY recorded_at DESC LIMIT 12""", (stock_id,))
     held = query("SELECT * FROM v_holdings WHERE user_id=%s AND stock_id=%s", (session["uid"], stock_id), True)
-    return render_template("stock.html", s=s, history=history, held=held)
+    watchlists = query(
+        """SELECT w.watchlist_id, w.name
+           FROM watchlists w
+           WHERE w.user_id=%s
+           ORDER BY w.name""",
+        (session["uid"],),
+    )
+    return render_template("stock.html", s=s, history=history, held=held, watchlists=watchlists)
 
 
 @app.post("/order")

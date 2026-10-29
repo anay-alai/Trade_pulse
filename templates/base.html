@@ -14,7 +14,9 @@
     <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
     <a href="{{ url_for('market') }}" class="{{ 'active' if request.endpoint == 'market' else '' }}">Market</a>
     <a href="{{ url_for('wallet') }}" class="{{ 'active' if request.endpoint == 'wallet' else '' }}">Wallet</a>
+    <a href="{{ url_for('watchlist') }}" class="{{ 'active' if request.endpoint == 'watchlist' else '' }}">Watchlists</a>
     <a href="{{ url_for('leaderboard') }}" class="{{ 'active' if request.endpoint == 'leaderboard' else '' }}">Leaderboard</a>
+    <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' else '' }}">Profile</a>
     {% if session.is_admin %}
     <a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' else '' }}">Exchange desk</a>
     {% endif %}
