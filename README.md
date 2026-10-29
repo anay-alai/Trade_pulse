@@ -23,7 +23,7 @@ python app.py                                      # http://127.0.0.1:5000
 | Stored procedures, cursor, error handlers (`SIGNAL`) | `03_routines.sql` |
 | Triggers | tradable-stock check, wallet, order, and stock price audit trail |
 | Views | `v_holdings`, `v_order_book`, `v_net_worth` in `04_views_queries.sql` |
-| Window functions, recursive CTE | leaderboard `RANK()`, 5-point moving average, running ledger total, seed price history |
+| Window functions, recursive CTE 5-point moving average, running ledger total, seed price history |
 | Indexing | composite `idx_book` on orders, `idx_user_orders_desc`; test with `EXPLAIN` (see end of `04`) |
 | Security | roles and `GRANT` in `05_security.sql` |
 
@@ -39,7 +39,6 @@ python app.py                                      # http://127.0.0.1:5000
 3. Open the Exchange desk and drop RELIANCE to that price. The waiting order fills, and any price improvement is refunded.
 4. Try to sell more shares than you own, or buy with too little cash: the procedure rejects it and rolls back.
 5. Concurrency: in two `mysql` sessions run `CALL sp_place_order(...)` for the same user at once. The second waits on the wallet row lock.
-6. Check the Leaderboard and the `EXPLAIN` output for the order-book query.
 
 ## Known simplifications
 Demo login has no password check (hashes are stored for the schema). Orders fill in full against the current price rather than matching user to user. The Exchange desk is restricted to Admin users (User #1 Aarav by default).

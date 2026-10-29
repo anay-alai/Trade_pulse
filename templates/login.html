@@ -1,16 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="login">
-  <h1>Pick a trader to start</h1>
-  <p class="muted">Demo accounts only. Each has a funded wallet and sample holdings.</p>
   <form method="post" class="stack">
     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-    {% for u in users %}
-    <button name="user_id" value="{{ u.user_id }}" class="who-btn" {% if u.status == 'SUSPENDED' %}disabled style="opacity: 0.5;"{% endif %}>
-      {{ u.full_name }} {% if u.user_id == 1 %}<small>(Admin)</small>{% endif %}
-      <span>{{ u.email }} {% if u.status == 'SUSPENDED' %}&bull; Suspended{% endif %}</span>
-    </button>
-    {% endfor %}
+
+    <div class="login-box">
+      <h2>Welcome back</h2>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Enter password" required>
+
+      <button type="submit" class="primary-btn">Login</button>
+    </div>
   </form>
+
+  <div class="demo-users">
+    <h3>Demo accounts</h3>
+    {% for u in users %}
+    <div class="demo-user {% if u.status == 'SUSPENDED' %}disabled{% endif %}">
+      <span>{{ u.full_name }}</span>
+      <small>{{ u.email }}</small>
+      <small>Password: password</small>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

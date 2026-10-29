@@ -21,8 +21,6 @@ SELECT u.user_id, u.full_name,
 FROM users u LEFT JOIN wallets w USING (user_id);
 
 -- ---- Example analytical queries (also used by the web app) ----
--- Net worth leaderboard (window RANK):
---   SELECT full_name, cash, holdings, cash + holdings AS net_worth, RANK() OVER (ORDER BY cash + holdings DESC) AS position FROM v_net_worth;
 -- 5-day moving average (window AVG):
 --   SELECT recorded_at, price, AVG(price) OVER (ORDER BY recorded_at ROWS BETWEEN 4 PRECEDING AND CURRENT ROW) AS ma5
 --   FROM stock_prices WHERE stock_id = 1;

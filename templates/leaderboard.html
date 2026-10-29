@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Leaderboard</h1>
-<p class="muted">Ranked by net worth: cash plus the current value of holdings.</p>
-<table>
-  <tr><th>Rank</th><th>Trader</th><th class="n">Cash</th><th class="n">Holdings</th><th class="n">Net worth</th></tr>
-  {% for r in rows %}<tr><td>{{ r.position }}</td><td>{{ r.full_name }}</td><td class="n">{{ r.cash|money }}</td><td class="n">{{ r.holdings|money }}</td><td class="n"><b>{{ r.net_worth|money }}</b></td></tr>{% endfor %}
-</table>
-{% endblock %}

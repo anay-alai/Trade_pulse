@@ -118,16 +118,23 @@ def run(proc, args, ok_msg):
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user_id_raw = request.form.get("user_id")
-        try:
-            uid = int(user_id_raw)
-        except (TypeError, ValueError):
-            flash("Invalid user selected.", "error")
+        email = (request.form.get("email") or "").strip()
+        password = request.form.get("password") or ""
+
+        if not email or not password:
+            flash("Please enter both email and password.", "error")
             return redirect(url_for("login"))
 
-        user = query("SELECT user_id, full_name, status FROM users WHERE user_id=%s", (uid,), True)
+        user = query(
+            """SELECT user_id, full_name, email, status
+               FROM users
+               WHERE LOWER(email)=LOWER(%s) AND password_hash = SHA2(%s, 256)""",
+            (email, password),
+            True,
+        )
+
         if not user:
-            flash("Selected user does not exist.", "error")
+            flash("Invalid email or password.", "error")
             return redirect(url_for("login"))
 
         if user.get("status") != "ACTIVE":
@@ -136,7 +143,6 @@ def login():
 
         session["uid"] = user["user_id"]
         session["name"] = user["full_name"]
-        # In this demo setup, User #1 (Aarav Sharma) acts as Administrator
         session["is_admin"] = (user["user_id"] == 1)
         return redirect(url_for("dashboard"))
 
@@ -273,14 +279,6 @@ def wallet():
                       WHERE w.user_id=%s ORDER BY t.txn_id DESC LIMIT 30""", (uid,))
     return render_template("wallet.html", w=w, ledger=ledger)
 
-
-@app.route("/leaderboard")
-@login_required
-def leaderboard():
-    rows = query("""SELECT full_name, cash, holdings, cash + holdings AS net_worth,
-                           RANK() OVER (ORDER BY cash + holdings DESC) AS position
-                    FROM v_net_worth ORDER BY position""")
-    return render_template("leaderboard.html", rows=rows)
 
 
 @app.route("/admin", methods=["GET", "POST"])

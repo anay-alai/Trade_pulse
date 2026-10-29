@@ -1,11 +1,11 @@
 USE trading_db;
 
 INSERT INTO users (full_name, email, password_hash) VALUES
- ('Aarav Sharma','aarav@example.com',SHA2('password',256)),
- ('Diya Patil','diya@example.com',SHA2('password',256)),
- ('Kabir Mehta','kabir@example.com',SHA2('password',256)),
- ('Meera Iyer','meera@example.com',SHA2('password',256)),
- ('Rohan Desai','rohan@example.com',SHA2('password',256));
+ ('Anay Alai','anay@example.com',SHA2('password',256)),
+ ('Yash Kothalkar','yash@example.com',SHA2('password',256)),
+ ('Sumit Desai','sumit@example.com',SHA2('password',256)),
+ ('Bhavesh Gadling','bhavesh@example.com',SHA2('password',256)),
+ ('Anshul Kalmegh','anshul@example.com',SHA2('password',256));
 
 INSERT INTO user_profiles (user_id, pan_number, kyc_status) VALUES
  (1,'ABCDE1234F','VERIFIED'),(2,'BCDEF2345G','VERIFIED'),(3,'CDEFG3456H','VERIFIED'),
